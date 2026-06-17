@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aşkın Frekansı V3 - Neon Purple & Orange</title>
+    <!-- Tailwind CSS v4 Tarayıcı Derleyicisi -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Modern ve Fütüristik Yazı Tipleri -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .pop-font { font-family: 'Syne', sans-serif; }
+        
+        /* Geliştirilmiş Derin Neon Işıma Efektleri */
+        .neon-purple-glow {
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.25), inset 0 0 20px rgba(168, 85, 247, 0.15);
+        }
+        .neon-orange-glow {
+            box-shadow: 0 0 25px rgba(249, 115, 22, 0.45);
+        }
+
+        /* Hayır butonunun yok olma/glitch animasyonu */
+        .dissolve-effect {
+            animation: glitchDissolve 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes glitchDissolve {
+            0% { transform: scale(1) skewX(0deg); opacity: 1; filter: hue-rotate(0deg); }
+            50% { transform: scale(1.05) skewX(-12deg); filter: hue-rotate(90deg); opacity: 0.4; }
+            100% { transform: scale(0) skewX(25deg); opacity: 0; filter: blur(12px); }
+        }
+    </style>
+</head>
+<body class="bg-[#090514] text-neutral-100 min-h-screen flex flex-col items-center justify-center p-4 relative overflow-x-hidden select-none">
+
+    <!-- Arka Plan Küresel Işıkları (Glow) -->
+    <div class="absolute -top-20 -left-20 w-96 h-96 bg-purple-600/20 rounded-full blur-[130px] pointer-events-none"></div>
+    <div class="absolute bottom-10 -right-20 w-[450px] h-[450px] bg-orange-500/15 rounded-full blur-[140px] pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[200px] pointer-events-none"></div>
+
+    <!-- HTML5 Ses Elementi (Senin indirdiğin müzik için hazır) -->
+    <audio id="love-audio" src="img/ses.mp3" loop></audio>
+
+    <!-- GİRİŞ EKRANI (KART) -->
+    <div id="quiz-screen" class="bg-[#110a2b]/80 border border-purple-500/30 backdrop-blur-2xl rounded-3xl p-8 max-w-sm w-full text-center z-10 transition-all duration-500 scale-100 neon-purple-glow">
+        <div class="w-16 h-16 bg-gradient-to-tr from-purple-600 to-orange-500 rounded-2xl mx-auto mb-6 flex items-center justify-center rotate-4 shadow-lg">
+            <span class="text-2xl animate-pulse">⚡</span>
+        </div>
+        
+        <h2 class="pop-font text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-orange-400 mb-3 tracking-tight font-extrabold">
+            Enerji Eşleşmesi Aranıyor
+        </h2>
+        <p class="text-xs text-purple-200/60 mb-6 font-light">Kalbimin frekansına bağlanmaya hazır mısın?</p>
+        
+        <!-- Dinamik Hata Mesajı Alanı -->
+        <p id="error-msg" class="text-xs text-orange-400 font-semibold mb-4 min-h-[20px] opacity-0 transition-opacity duration-300"></p>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onclick="handleEvet()" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-3.5 rounded-xl transition-all active:scale-95 cursor-pointer text-sm tracking-wide neon-orange-glow">
+                BAĞLAN 🤍
+            </button>
+            <button id="btn-hayir" onclick="handleHayir()" class="bg-purple-950/40 hover:bg-purple-900/50 text-purple-300/80 px-6 py-3.5 rounded-xl font-medium transition-all cursor-pointer text-sm border border-purple-500/20 hover:border-purple-500/40">
+                Reddet
+            </button>
+        </div>
+    </div>
+
+    <!-- ANA İÇERİK EKRANI (BAŞLANGIÇTA GİZLİ) -->
+    <div id="main-screen" class="hidden opacity-0 max-w-4xl w-full transition-all duration-700 flex flex-col items-center gap-6 z-10">
+        
+        <!-- Üst Kontrol ve Frekans Paneli -->
+        <div class="w-full bg-[#110a2b]/60 border border-purple-500/20 backdrop-blur-md rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+            <div class="flex items-center gap-4">
+                <!-- Ses Dalgaları Görsel Simülasyonu -->
+                <div id="audio-visualizer" class="flex items-end gap-1 h-6 w-8">
+                    <span class="bar w-1 bg-purple-500 h-2 rounded-full transition-all duration-300"></span>
+                    <span class="bar w-1 bg-orange-500 h-4 rounded-full transition-all duration-300"></span>
+                    <span class="bar w-1 bg-purple-400 h-1 rounded-full transition-all duration-300"></span>
+                    <span class="bar w-1 bg-orange-400 h-5 rounded-full transition-all duration-300"></span>
+                </div>
+                <div>
+                    <h1 class="pop-font text-sm uppercase tracking-widest bg-gradient-to-r from-purple-400 to-orange-400 text-transparent bg-clip-text font-bold">BİZİM FREKANSIMIZ</h1>
+                    <p class="text-[11px] text-purple-300/50 font-mono">Uzak mesafe // Eş zamanlı ritim</p>
+                </div>
+            </div>
+
+            <!-- Yenilenen Güvenli Ses Butonu -->
+            <button id="btn-toggle-audio" onclick="toggleAudio()" class="w-full sm:w-auto text-xs font-bold px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all border border-purple-400/30 shadow-lg cursor-pointer tracking-wider text-center">
+                ⏸ FREKANSI DURDUR
+            </button>
+        </div>
+
+        <!-- Sekme Değiştirici Menü (Tab Navigation) -->
+        <div class="flex bg-[#0f0926] p-1.5 rounded-xl border border-purple-500/20 w-full max-w-sm shadow-inner">
+            <button onclick="switchView('mektup')" id="nav-mektup" class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md cursor-pointer uppercase tracking-wider">
+                Mektup
+            </button>
+            <button onclick="switchView('album')" id="nav-album" class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all text-purple-300/60 hover:text-purple-200 cursor-pointer uppercase tracking-wider">
+                Dijital Albüm
+            </button>
+        </div>
+
+        <!-- İçerik Alanı -->
+        <div class="w-full min-h-[420px] relative">
+            
+            <!-- SEKME 1: MEKTUP GÖRÜNÜMÜ -->
+            <div id="view-mektup" class="w-full grid grid-cols-1 md:grid-cols-12 gap-6 transition-all duration-500 opacity-100">
+                <!-- Sol Taraf Kapak Fotoğrafı -->
+                <div class="md:col-span-5 bg-[#110a2b]/80 p-4 rounded-3xl border border-purple-500/10 flex flex-col justify-center items-center group shadow-xl">
+                    <div class="w-full aspect-[4/5] bg-[#090514] rounded-2xl overflow-hidden border border-purple-500/20 relative">
+                        <img src="img/11.jpg" alt="Biz" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-103">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#090514] via-transparent to-transparent opacity-70"></div>
+                        <div class="absolute bottom-4 left-4 bg-gradient-to-r from-orange-500 to-orange-600 text-neutral-100 px-3 py-1.5 text-[9px] uppercase font-black tracking-widest rounded-md shadow-md">LIVE CONNECTED</div>
+                    </div>
+                </div>
+
+                <!-- Sağ Taraf Mektup İçeriği -->
+                <div class="md:col-span-7 bg-[#110a2b]/80 p-8 md:p-10 rounded-3xl border border-purple-500/20 relative flex flex-col justify-center shadow-xl overflow-hidden neon-purple-glow">
+                    <div class="absolute -right-12 -bottom-12 pop-font text-9xl text-purple-500/5 font-black pointer-events-none select-none">CORE</div>
+                    
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping"></span>
+                        <h3 class="pop-font text-md text-orange-400 tracking-wide uppercase font-bold">Sinyal Gönderildi: Kalbime...</h3>
+                    </div>
+
+                    <div class="text-sm text-purple-200/90 leading-relaxed font-light tracking-wide space-y-4">
+                        <p>Saniyelerin bile seni düşünmeden geçmediği bir hayat bu. Aramızdaki yollar, sana kavuşacağım o ilk saniyenin heyecanını büyütmekten başka hiçbir işe yaramıyor.</p>
+                        <p>Yanında olamasam da, bu ekrandaki mor ve turuncu enerjinin uyumu gibi kalbim de tamamen senin aşkınla rezone oluyor. Mesafeler sadece birer sayı, bizim bağımız ise tamamen dijital ve ruhsal bir sonsuzluk.</p>
+                        <p class="pt-2"><span class="font-bold text-orange-400 text-base shadow-sm">Seni çok ama çok seviyorum.</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEKME 2: DİJİTAL ALBÜM GÖRÜNÜMÜ -->
+            <div id="view-album" class="w-full hidden transition-all duration-500 opacity-0">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    
+                    <!-- Büyük Öne Çıkan Fotoğraf Card -->
+                    <div class="col-span-2 bg-[#110a2b]/80 p-3 rounded-2xl border border-purple-500/30 group overflow-hidden relative shadow-lg">
+                        <div class="w-full h-48 sm:h-52 bg-[#090514] rounded-xl overflow-hidden relative">
+                            <img src="img/1.jpg" class="w-full h-full object-cover group-hover:scale-103 transition-all duration-700" alt="Anı 1">
+                            <div class="absolute inset-0 bg-gradient-to-t from-purple-950/60 to-transparent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Standart Fotoğraf Kartları -->
+                    <div class="bg-[#110a2b]/80 p-2.5 rounded-2xl border border-purple-500/10 group overflow-hidden shadow-md hover:border-purple-500/30 transition-all duration-300">
+                        <div class="w-full aspect-square bg-[#090514] rounded-xl overflow-hidden">
+                            <img src="img/2.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" alt="Anı 2">
+                        </div>
+                    </div>
+
+                    <div class="bg-[#110a2b]/80 p-2.5 rounded-2xl border border-purple-500/10 group overflow-hidden shadow-md hover:border-purple-500/30 transition-all duration-300">
+                        <div class="w-full aspect-square bg-[#090514] rounded-xl overflow-hidden">
+                            <img src="img/3.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" alt="Anı 3">
+                        </div>
+                    </div>
+
+                    <div class="bg-[#110a2b]/80 p-2.5 rounded-2xl border border-purple-500/10 group overflow-hidden shadow-md hover:border-purple-500/30 transition-all duration-300">
+                        <div class="w-full aspect-square bg-[#090514] rounded-xl overflow-hidden">
+                            <img src="img/4.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" alt="Anı 4">
+                        </div>
+                    </div>
+
+                    <div class="bg-[#110a2b]/80 p-2.5 rounded-2xl border border-purple-500/10 group overflow-hidden shadow-md hover:border-purple-500/30 transition-all duration-300">
+                        <div class="w-full aspect-square bg-[#090514] rounded-xl overflow-hidden">
+                            <img src="img/5.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" alt="Anı 5">
+                        </div>
+                    </div>
+
+                    <div class="bg-[#110a2b]/80 p-2.5 rounded-2xl border border-purple-500/10 group overflow-hidden shadow-md hover:border-purple-500/30 transition-all duration-300">
+                        <div class="w-full aspect-square bg-[#090514] rounded-xl overflow-hidden">
+                            <img src="img/6.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" alt="Anı 6">
+                        </div>
+                    </div>
+
+                    <div class="bg-[#110a2b]/80 p-2.5 rounded-2xl border border-purple-500/10 group overflow-hidden shadow-md hover:border-purple-500/30 transition-all duration-300">
+                        <div class="w-full aspect-square bg-[#090514] rounded-xl overflow-hidden">
+                            <img src="img/7.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" alt="Anı 7">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT MOTORU -->
+    <script>
+        // DOM Elementlerini Seçme
+        const audio = document.getElementById('love-audio');
+        const btnToggleAudio = document.getElementById('btn-toggle-audio');
+        let visualizerInterval = null;
+
+        // 1. SES DALGASI SIMÜLASYONU
+        function startVisualizer() {
+            const bars = document.querySelectorAll('#audio-visualizer .bar');
+            if (visualizerInterval) clearInterval(visualizerInterval);
+            
+            visualizerInterval = setInterval(() => {
+                bars.forEach(bar => {
+                    const randomHeight = Math.floor(Math.random() * 20) + 4; // 4px - 24px dinamik aralık
+                    bar.style.height = `${randomHeight}px`;
+                });
+            }, 120); // Dalgalanma akıcılığı artırıldı
+        }
+
+        function stopVisualizer() {
+            clearInterval(visualizerInterval);
+            const bars = document.querySelectorAll('#audio-visualizer .bar');
+            bars.forEach((bar, index) => {
+                bar.style.height = index % 2 === 0 ? '6px' : '12px'; // Sabit estetik duruş
+            });
+        }
+
+        // 2. HAYIR BUTONU AKSİYONU
+        function handleHayir() {
+            const btnHayir = document.getElementById('btn-hayir');
+            const errorMsg = document.getElementById('error-msg');
+
+            btnHayir.classList.add('dissolve-effect');
+            btnHayir.style.pointerEvents = 'none';
+
+            errorMsg.textContent = "⚡ Sinyal Kesildi: Kalbimin frekansı tek taraflı çalışamaz. Tekrar dene.";
+            errorMsg.classList.remove('opacity-0');
+            errorMsg.classList.add('opacity-100');
+
+            setTimeout(() => {
+                btnHayir.style.visibility = 'hidden';
+            }, 700);
+        }
+
+        // 3. EVET BUTONU AKSİYONU (Müzik Tetiklemeli)
+        function handleEvet() {
+            const quizScreen = document.getElementById('quiz-screen');
+            const mainScreen = document.getElementById('main-screen');
+
+            // İlk kartı küçülterek pürüzsüzce yok etme
+            quizScreen.classList.add('opacity-0', 'scale-95');
+            
+            setTimeout(() => {
+                quizScreen.classList.add('hidden');
+                mainScreen.classList.remove('hidden');
+                
+                // HTML5 Audio API güvenli oynatma mekanizması
+                audio.play()
+                    .then(() => startVisualizer())
+                    .catch(err => {
+                        console.log("Kullanıcı etkileşim koruması veya dosya eksik.");
+                        // Tarayıcı engellerse bile görsel simülasyon başlasın
+                        startVisualizer();
+                    });
+
+                // Ana ekranı pürüzsüzce görünür yapma
+                setTimeout(() => {
+                    mainScreen.classList.remove('opacity-0');
+                    mainScreen.classList.add('opacity-100');
+                }, 50);
+
+            }, 500);
+        }
+
+        // 4. ŞARKIYI AÇ / KAPAT (DÜZELTİLDİ 🛠️)
+        function toggleAudio() {
+            if (audio.paused) {
+                audio.play()
+                    .then(() => startVisualizer())
+                    .catch(err => console.log("Müzik yürütülemedi."));
+                btnToggleAudio.textContent = "⏸ FREKANSI DURDUR";
+                btnToggleAudio.className = "w-full sm:w-auto text-xs font-bold px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all border border-purple-400/30 shadow-lg cursor-pointer tracking-wider text-center";
+            } else {
+                audio.pause();
+                stopVisualizer();
+                btnToggleAudio.textContent = "▶ FREKANSI BAŞLAT";
+                // Durdurulduğunda butonu turuncu yaparak dikkat çekme efekti
+                btnToggleAudio.className = "w-full sm:w-auto text-xs font-bold px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 rounded-xl transition-all border border-orange-400/30 shadow-lg cursor-pointer tracking-wider text-center";
+            }
+        }
+
+        // 5. SEKMELER ARASI GEÇİŞ MANTIĞI (DÜZELTİLDİ 🛠️)
+        function switchView(viewName) {
+            const viewMektup = document.getElementById('view-mektup');
+            const viewAlbum = document.getElementById('view-album');
+            const navMektup = document.getElementById('nav-mektup');
+            const navAlbum = document.getElementById('nav-album');
+
+            const activeNavClass = "flex-1 py-2.5 text-xs font-bold rounded-lg transition-all bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md cursor-pointer uppercase tracking-wider";
+            const inactiveNavClass = "flex-1 py-2.5 text-xs font-bold rounded-lg transition-all text-purple-300/60 hover:text-purple-200 cursor-pointer uppercase tracking-wider";
+
+            if (viewName === 'mektup') {
+                // Albümü gizle
+                viewAlbum.classList.add('opacity-0');
+                setTimeout(() => {
+                    viewAlbum.classList.add('hidden');
+                    // Mektubu göster
+                    viewMektup.classList.remove('hidden');
+                    setTimeout(() => viewMektup.classList.add('opacity-100'), 20);
+                }, 300);
+
+                navMektup.className = activeNavClass;
+                navAlbum.className = inactiveNavClass;
+            } else {
+                // Mektubu gizle
+                viewMektup.classList.remove('opacity-100');
+                viewMektup.classList.add('opacity-0');
+                setTimeout(() => {
+                    viewMektup.classList.add('hidden');
+                    // Albümü göster
+                    viewAlbum.classList.remove('hidden');
+                    setTimeout(() => viewAlbum.classList.add('opacity-100'), 20);
+                }, 300);
+
+                navAlbum.className = activeNavClass;
+                navMektup.className = inactiveNavClass;
+            }
+        }
+    </script>
+</body>
+</html>
